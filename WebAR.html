@@ -120,6 +120,11 @@
     <div class='mdl-tooltip' for='borderColor'>
         Set the marker border color, using hexa code or color name.
     </div>
+    <div class="w3-padding-32">
+        <button id="download" class="w3-btn w3-xlarge w3-dark-grey w3-hover-light-grey" style="font-weight:900;">DOWNLOAD</button>
+        <button id="patt" class="w3-btn w3-xlarge w3-dark-grey w3-hover-light-grey" style="font-weight:900;">DOWNLOAD PATTERN</button>
+      </div>
+
 </div>
 </div>
 
@@ -145,6 +150,9 @@
 
 <!-- Script for Sidebar, Tabs, Accordions, Progress bars and slideshows -->
 <script>
+    var fullMarkerURL = null;
+    var innerImageURL = null;
+
     document.getElementById("arcam").onclick = function () {
         location.href = "http://localhost/webAR/ARCam.html";
     };
@@ -194,8 +202,27 @@ function generate_feature(){
       var gui = new dat.GUI();
       gui.add(window, 'fastThreshold', 0, 100).onChange(doFindFeatures);
 }
+    document.querySelector('#patt').addEventListener('click', function(){
 
-document.querySelector('#patternRatioSlider').addEventListener('input', function(){
+		console.assert(innerImageURL)
+		THREEx.ArPatternFile.encodeImageURL(innerImageURL, function onComplete(patternFileString){
+			THREEx.ArPatternFile.triggerDownload(patternFileString, "pattern-" + "marker" + ".patt")
+		})
+	})
+
+    document.querySelector('#download').addEventListener('click', function(){
+
+		// tech from https://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
+        var domElement = window.document.createElement('a');
+        console.log(fullMarkerURL); //test if change
+		domElement.href = fullMarkerURL;
+		domElement.download = "pattern-" + 'marker' + '.png';
+		document.body.appendChild(domElement)
+		domElement.click();
+		document.body.removeChild(domElement)
+    })
+    
+    document.querySelector('#patternRatioSlider').addEventListener('input', function(){
 		// update the patternRatio number
 		var patternRatio = document.querySelector('#patternRatioSlider').value/100
 		var domElement = document.querySelector('[for=patternRatioSlider] span')
@@ -225,7 +252,7 @@ document.querySelector('#patternRatioSlider').addEventListener('input', function
 
 
 function updateFullMarkerImage(){
-        var image = document.getElementById('output').src;
+        innerImageURL = document.getElementById('output').src;
 		// get patternRatio
 		var patternRatio = document.querySelector('#patternRatioSlider').value/100
 		var imageSize = document.querySelector('#imageSize').value
@@ -242,7 +269,7 @@ function updateFullMarkerImage(){
 			borderColor = 'black';
 		}
 
-		THREEx.ArPatternFile.buildFullMarker(image, patternRatio, imageSize, borderColor, function onComplete(markerUrl){
+		THREEx.ArPatternFile.buildFullMarker(innerImageURL, patternRatio, imageSize, borderColor, function onComplete(markerUrl){
 			fullMarkerURL = markerUrl
 
 			var fullMarkerImage = document.createElement('img')
