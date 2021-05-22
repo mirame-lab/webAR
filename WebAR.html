@@ -18,12 +18,6 @@
 
 <style>
     
-#canvas{
- 
-  width: 100%;
-  height: 100%;
-
-}
 
 #marker_img img {
 		width: 100%;
@@ -174,11 +168,13 @@ function generate_feature(){
       var canvas = document.getElementById('canvas');
       var context = canvas.getContext('2d');
       var marker = document.getElementById('marker');
-      var width = canvas.clientWidth;
-      var height = canvas.clientHeight;
-
       var image = document.getElementById('output');
-
+      var width = image.clientWidth;
+      var height = image.clientHeight;
+      console.log(height + " " + width);
+      
+      canvas.width = width;
+      canvas.height = height;
       window.fastThreshold = 10;
 
       var doFindFeatures = function() {
