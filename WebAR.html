@@ -7,8 +7,13 @@
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="style.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+<link rel='stylesheet' href='https://code.getmdl.io/1.3.0/material.indigo-pink.min.css'>
+<script defer src='https://code.getmdl.io/1.3.0/material.min.js'></script>
+<link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
 <script src="tracking.js-master/build/tracking-min.js"></script>
 <script src="tracking.js-master/node_modules/dat.gui/build/dat.gui.min.js"></script>
+<script src="AR.js-master/three.js/examples/marker-training/threex-arpatternfile.js"> </script>
 
 
 <style>
@@ -19,6 +24,11 @@
   height: 100%;
 
 }
+
+#marker_img img {
+		width: 100%;
+		max-width: 512px;
+	}
 </style>
 <body>
 
@@ -63,6 +73,62 @@
 </div>
 </div>
 
+<div id="marker" style="display: none;">
+    <h2 class="w3-center">Marker</h2>
+    <div class="w3-content" style="max-width:800px;position:relative;">
+
+    <!-- <img id="marker_img" class="mySlides w3-animate-opacity" style="width:100%"> -->
+    <div class='mdl-grid'>
+
+        <div class='mdl-cell mdl-cell--3-col'></div>
+        <div class='mdl-cell mdl-cell--6-col'>
+            <div id='marker_img'></div>
+        </div>
+        <div class='mdl-cell mdl-cell--3-col'></div>
+    </div>
+    
+    <div style="justify-content: center" class='mdl-grid'>
+        <div class='mdl-cell mdl-cell--12-col'>
+        <label class="mdl-js-ripple-effect" for="patternRatioSlider">
+            <span class="">Pattern Ratio 0.50</span>
+            <input id='patternRatioSlider' class="mdl-slider mdl-js-slider" type="range" min="10" max="90" value="50" >
+        </label>
+        <div class='mdl-tooltip' for='patternRatioSlider'>
+            Set size of inner image vs black border
+        </div>
+    </div>
+</div>
+
+<div style="justify-content: center" class='mdl-grid'>
+    <div class='mdl-cell mdl-cell--12-col'>
+        <label class="mdl-js-ripple-effect" for="imageSize">
+            <span class="">Image size 512px</span>
+            <input id='imageSize' class="mdl-slider mdl-js-slider" type="range" min="150" max="2500" value="512" >
+        </label>
+        <div class='mdl-tooltip' for='patternRatioSlider'>
+            Set the pixel width/height of the image.
+        </div>
+    </div>
+</div>
+
+<div style="justify-content: center" class='mdl-grid'>
+    <div class='mdl-cell mdl-cell--12-col'>
+    <label class="mdl-js-ripple-effect" for="borderColor">
+        <span class="">Border color. Please choose a dark one.</span>
+        <input id='borderColor' type="text" value="black">
+    </label>
+    <div class='mdl-tooltip' for='borderColor'>
+        Set the marker border color, using hexa code or color name.
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+<hr>
+
+
+
 
 
 <!-- Footer -->
@@ -85,9 +151,13 @@
 
 //Upload
 var loadFile = function(event) {
-	var image = document.getElementById('output');
+    var image = document.getElementById('output');
+    var mark = document.getElementById('marker_img');
+
     image.src = URL.createObjectURL(event.target.files[0]);
-    
+    updateFullMarkerImage()
+ 
+
     document.getElementById("gen").disabled = false;
 };
 
@@ -95,7 +165,7 @@ var loadFile = function(event) {
 function generate_feature(){
       var canvas = document.getElementById('canvas');
       var context = canvas.getContext('2d');
-    
+      var marker = document.getElementById('marker');
       var width = canvas.clientWidth;
       var height = canvas.clientHeight;
 
@@ -120,9 +190,71 @@ function generate_feature(){
 
       doFindFeatures();
 
+      marker.style.display = "block";
       var gui = new dat.GUI();
       gui.add(window, 'fastThreshold', 0, 100).onChange(doFindFeatures);
 }
+
+document.querySelector('#patternRatioSlider').addEventListener('input', function(){
+		// update the patternRatio number
+		var patternRatio = document.querySelector('#patternRatioSlider').value/100
+		var domElement = document.querySelector('[for=patternRatioSlider] span')
+		domElement.innerHTML = `Pattern Ratio ${patternRatio.toFixed(2)}`
+
+		// update fullMarkerImage
+		updateFullMarkerImage()
+	})
+
+	document.querySelector('#imageSize').addEventListener('input', function(){
+		// update the patternRatio number
+		var imageSize = document.querySelector('#imageSize').value
+		var domElement = document.querySelector('[for=imageSize] span')
+		domElement.innerHTML = `Image size ${imageSize}px`
+
+		// update fullMarkerImage
+		updateFullMarkerImage()
+	})
+
+	document.querySelector('#borderColor').addEventListener('input', function(){
+		var imageSize = document.querySelector('#borderColor').value
+		var domElement = document.querySelector('[for=borderColor] span')
+
+		// update fullMarkerImage
+		updateFullMarkerImage()
+	})
+
+
+function updateFullMarkerImage(){
+        var image = document.getElementById('output').src;
+		// get patternRatio
+		var patternRatio = document.querySelector('#patternRatioSlider').value/100
+		var imageSize = document.querySelector('#imageSize').value
+		var borderColor = document.querySelector('#borderColor').value
+
+		function hexaColor(color) {
+			return /^#[0-9A-F]{6}$/i.test(color);
+		};
+
+		var s = new Option().style;
+		s.color = borderColor;
+  		if (borderColor === '' || (s.color != borderColor && !hexaColor(borderColor))) {
+			// if color not valid, use black
+			borderColor = 'black';
+		}
+
+		THREEx.ArPatternFile.buildFullMarker(image, patternRatio, imageSize, borderColor, function onComplete(markerUrl){
+			fullMarkerURL = markerUrl
+
+			var fullMarkerImage = document.createElement('img')
+			fullMarkerImage.src = fullMarkerURL
+
+			// put fullMarkerImage into #imageContainer
+			var container = document.querySelector('#marker_img')
+			while (container.firstChild) container.removeChild(container.firstChild);
+			container.appendChild(fullMarkerImage)
+		})
+	}
+
 
 // Side navigation
 function w3_open() {
