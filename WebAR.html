@@ -6,14 +6,18 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
-
+<link rel="stylesheet" href="style.css">
 <script src="tracking.js-master/build/tracking-min.js"></script>
 <script src="tracking.js-master/node_modules/dat.gui/build/dat.gui.min.js"></script>
 
+
 <style>
+    
 #canvas{
+ 
   width: 100%;
   height: 100%;
+
 }
 </style>
 <body>
@@ -21,7 +25,7 @@
 
 <!-- Header -->
 <header class="w3-container w3-theme w3-padding" id="myHeader">
-  <i onclick="w3_open()" class="fa  w3-xlarge w3-button w3-theme"></i> 
+  <i id="arcam" class=" fa fa-camera w3-xlarge w3-button w3-theme "  title="open AR Camera"></i> 
   <div class="w3-center">
   <h4>ASSIGNMENT 2</h4>
   <h1 class="w3-xxxlarge w3-animate-bottom">AR MARKER GENERATOR</h1>
@@ -75,6 +79,9 @@
 
 <!-- Script for Sidebar, Tabs, Accordions, Progress bars and slideshows -->
 <script>
+    document.getElementById("arcam").onclick = function () {
+        location.href = "http://localhost/webAR/ARCam.html";
+    };
 
 //Upload
 var loadFile = function(event) {
@@ -84,11 +91,13 @@ var loadFile = function(event) {
 
 };
 
+//Feature generator
 function generate_feature(){
-      var width = 400;
-      var height =400;
       var canvas = document.getElementById('canvas');
       var context = canvas.getContext('2d');
+    
+      var width = canvas.clientWidth;
+      var height = canvas.clientHeight;
 
       var image = document.getElementById('output');
 
@@ -100,6 +109,7 @@ function generate_feature(){
 
         var imageData = context.getImageData(0, 0, width, height);
         var gray = tracking.Image.grayscale(imageData.data, width, height);
+
         var corners = tracking.Fast.findCorners(gray, width, height);
 
         for (var i = 0; i < corners.length; i += 2) {
