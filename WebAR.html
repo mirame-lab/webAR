@@ -32,7 +32,7 @@
     <div class="w3-padding-32">
       <input type="file"  accept="image/*" name="image" id="file" onchange="loadFile(event)" style="display: none;">
       <button class="w3-btn w3-xlarge w3-dark-grey w3-hover-light-grey" style="font-weight:900;"><label for="file" style="cursor: pointer;">UPLOAD</label></button>
-      <button class="w3-btn w3-xlarge w3-dark-grey w3-hover-light-grey" style="font-weight:900;" onclick="generate_feature()">GENERATE FEATURES</button>
+      <button id="gen" class="w3-btn w3-xlarge w3-dark-grey w3-hover-light-grey" style="font-weight:900;" onclick="generate_feature()" disabled>GENERATE FEATURES</button>
     </div>
   </div>
 </header>
@@ -88,7 +88,7 @@ var loadFile = function(event) {
 	var image = document.getElementById('output');
     image.src = URL.createObjectURL(event.target.files[0]);
     
-
+    document.getElementById("gen").disabled = false;
 };
 
 //Feature generator
