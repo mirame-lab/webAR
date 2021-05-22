@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "install",
+			"path": "tracking.js-master/",
+			"problemMatcher": [],
+			"label": "npm: install - tracking.js-master",
+			"detail": "install dependencies from package"
+		}
+	]
+}
