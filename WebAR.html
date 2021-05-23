@@ -12,8 +12,9 @@
 <script defer src='https://code.getmdl.io/1.3.0/material.min.js'></script>
 <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
 <script src="tracking.js-master/build/tracking-min.js"></script>
-<script src="tracking.js-master/node_modules/dat.gui/build/dat.gui.min.js"></script>
+<!-- <script src="tracking.js-master/node_modules/dat.gui/build/dat.gui.min.js"></script> -->
 <script src="AR.js-master/three.js/examples/marker-training/threex-arpatternfile.js"> </script>
+<script async src="js/opencv.js" type="text/javascript"></script>
 
 
 <style>
@@ -54,7 +55,7 @@
 <div class="w3-third">
   <div class="w3-card w3-container" style="min-height:460px">
   <h3>Grayscale</h3><br>
-  <!-- <i class="fa fa-css3 w3-margin-bottom w3-text-theme" style="font-size:120px"></i> -->
+  <canvas id="graycanv"  name="gray"></canvas>
 
   </div>
 </div>
@@ -153,28 +154,45 @@
 
 //Upload
 var loadFile = function(event) {
-    var image = document.getElementById('output');
+    let image = document.getElementById('output');
     var mark = document.getElementById('marker_img');
 
     image.src = URL.createObjectURL(event.target.files[0]);
     updateFullMarkerImage()
- 
+
+    //grayscale
+
+image.onload = function() {
+  
+  let mat = cv.imread(image);
+  let dst = new cv.Mat();
+  cv.cvtColor(mat, dst, cv.COLOR_RGBA2GRAY, 0);
+
+  cv.imshow('graycanv', dst);
+  // mat.delete();
+};
 
     document.getElementById("gen").disabled = false;
 };
 
+//////////////////////////////////to be replaced with OpenCV//////////////////////////////////////////
+
+
+
 //Feature generator
 function generate_feature(){
       var canvas = document.getElementById('canvas');
+      var grayc = document.getElementById('graycanv');
       var context = canvas.getContext('2d');
+      var gctx = grayc.getContext('2d');
       var marker = document.getElementById('marker');
       var image = document.getElementById('output');
       var width = image.clientWidth;
       var height = image.clientHeight;
       console.log(height + " " + width);
       
-      canvas.width = width;
-      canvas.height = height;
+      grayc.width = canvas.width = width;
+      grayc.height = canvas.height = height;
       window.fastThreshold = 10;
 
       var doFindFeatures = function() {
@@ -195,9 +213,16 @@ function generate_feature(){
       doFindFeatures();
 
       marker.style.display = "block";
-      var gui = new dat.GUI();
-      gui.add(window, 'fastThreshold', 0, 100).onChange(doFindFeatures);
+
+      //not working
+      // var gui = new dat.GUI();
+      // gui.add(window, 'fastThreshold', 0, 100).onChange(doFindFeatures);
 }
+
+//////////////////////////////////to be replaced with OpenCV//////////////////////////////////////////
+
+
+//generate and download pattern
     document.querySelector('#patt').addEventListener('click', function(){
 
 		console.assert(innerImageURL)
@@ -291,23 +316,7 @@ function w3_close() {
   document.getElementById("mySidebar").style.display = "none";
 }
 
-// Tabs
-function openCity(evt, cityName) {
-  var i;
-  var x = document.getElementsByClassName("city");
-  for (i = 0; i < x.length; i++) {
-    x[i].style.display = "none";
-  }
-  var activebtn = document.getElementsByClassName("testbtn");
-  for (i = 0; i < x.length; i++) {
-    activebtn[i].className = activebtn[i].className.replace(" w3-dark-grey", "");
-  }
-  document.getElementById(cityName).style.display = "block";
-  evt.currentTarget.className += " w3-dark-grey";
-}
 
-var mybtn = document.getElementsByClassName("testbtn")[0];
-mybtn.click();
 
 // Accordions
 function myAccFunc(id) {
@@ -327,33 +336,7 @@ function plusDivs(n) {
   showDivs(slideIndex);
 }
 
-function showDivs(n) {
-  var x = document.getElementsByClassName("mySlides");
-  if (n > x.length) {slideIndex = 1}    
-  if (n < 1) {slideIndex = x.length} ;
-  for (i = 0; i < x.length; i++) {
-    x[i].style.display = "none";  
-  }
-  x[slideIndex-1].style.display = "block";  
-}
 
-showDivs(1);
-
-// Progress Bars
-function move() {
-  var elem = document.getElementById("myBar");   
-  var width = 5;
-  var id = setInterval(frame, 10);
-  function frame() {
-    if (width == 100) {
-      clearInterval(id);
-    } else {
-      width++; 
-      elem.style.width = width + '%'; 
-      elem.innerHTML = width * 1  + '%';
-    }
-  }
-}
 </script>
 
 </body>
