@@ -68,6 +68,7 @@
 </div>
 </div>
 
+
 <div id="marker" style="display: none;">
     <h2 class="w3-center">Marker</h2>
     <div class="w3-content" style="max-width:800px;position:relative;">
@@ -155,7 +156,7 @@
     let dst = null; 
 
     document.getElementById("arcam").onclick = function () {
-        location.href = "http://localhost/webAR/ARCam.html";
+        location.href = "http://localhost/webAR/AR.js-master/aframe/examples/marker-based/basic.html";
     };
 
 //Upload
@@ -221,7 +222,7 @@ function generate_feature(){
       
       var context = canvas.getContext('2d');
      
-      var marker = document.getElementById('marker');
+      var marker = document.getElementById('marker'); //div yg nak un-hide
       var image = document.getElementById('output');
       var width = image.clientWidth;
       var height = image.clientHeight;
