@@ -6,15 +6,15 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="/webAR/style.css">
 <link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
 <link rel='stylesheet' href='https://code.getmdl.io/1.3.0/material.indigo-pink.min.css'>
 <script defer src='https://code.getmdl.io/1.3.0/material.min.js'></script>
 <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
-<script src="tracking.js-master/build/tracking-min.js"></script>
+<script src="/webAR/tracking.js-master/build/tracking-min.js"></script>
 <!-- <script src="tracking.js-master/node_modules/dat.gui/build/dat.gui.min.js"></script> -->
-<script src="AR.js-master/three.js/examples/marker-training/threex-arpatternfile.js"> </script>
-<script async src="js/opencv.js" type="text/javascript"></script>
+<script src="/webAR/AR.js-master/three.js/examples/marker-training/threex-arpatternfile.js"> </script>
+<script async src="/webAR/js/opencv.js" type="text/javascript"></script>
 
 
 <style>
@@ -127,7 +127,11 @@
 </div>
 <hr>
 
-
+	<div class="spinner" id='spinner'></div>
+    <div class="emscripten" id="status">Downloading...</div>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden=1></progress>
+    </div>
 
 
 
@@ -142,11 +146,13 @@
   </div>
   <p>Remember to check out our  <a href="w3css_references.asp" class="w3-btn w3-theme-light" target="_blank">W3.CSS Reference</a></p>
 </footer>
-
+<script src='dat.gui.js'></script>
+<script async src="cv.js"></script>
 <!-- Script for Sidebar, Tabs, Accordions, Progress bars and slideshows -->
 <script>
     var fullMarkerURL = null;
     var innerImageURL = null;
+    let dst = null; 
 
     document.getElementById("arcam").onclick = function () {
         location.href = "http://localhost/webAR/ARCam.html";
@@ -161,40 +167,71 @@ var loadFile = function(event) {
     updateFullMarkerImage()
 
     //grayscale
-
-image.onload = function() {
-  
-  let mat = cv.imread(image);
-  let dst = new cv.Mat();
-  cv.cvtColor(mat, dst, cv.COLOR_RGBA2GRAY, 0);
-
-  cv.imshow('graycanv', dst);
-  // mat.delete();
-};
-
+    
+    grayscale(image);
     document.getElementById("gen").disabled = false;
 };
 
 //////////////////////////////////to be replaced with OpenCV//////////////////////////////////////////
 
+function grayscale(image){
+  
+image.onload = function() {
+  
+  let mat = cv.imread(image);
+  dst = new cv.Mat();
+  cv.cvtColor(mat, dst, cv.COLOR_RGBA2GRAY, 0);
 
+  cv.imshow('graycanv', dst);
+  mat.delete();
 
+  // brisk_opencv(dst);
+}
+}
+
+// function brisk_opencv(dst){
+//  // Initiate STAR detector
+//   var brisk = new cv.BRISK(30, 1, 3);
+
+// // find the keypoints with ORB
+// var kp = new cv.KeyPointVector();
+// brisk.detect(dst,kp, new cv.Mat());
+
+// // compute the descriptors with ORB
+// var des = new cv.Mat();
+// brisk.compute(dst, kp, des);
+
+// // draw only keypoints location,not size and orientation
+// var img2 = new cv.Mat();
+// var color = new cv.Scalar(0,255,0);
+// cv.drawKeypoints(dst, kp, img2, color, 0);
+// show_image(img2, "canvas");
+
+// kp.delete();
+// color.delete();
+// brisk.delete();
+// des.delete();
+// dst.delete();
+// }
 //Feature generator
 function generate_feature(){
+
+      
       var canvas = document.getElementById('canvas');
-      var grayc = document.getElementById('graycanv');
+      
       var context = canvas.getContext('2d');
-      var gctx = grayc.getContext('2d');
+     
       var marker = document.getElementById('marker');
       var image = document.getElementById('output');
       var width = image.clientWidth;
       var height = image.clientHeight;
       console.log(height + " " + width);
       
-      grayc.width = canvas.width = width;
-      grayc.height = canvas.height = height;
+      canvas.width = width;
+      canvas.height = height;
       window.fastThreshold = 10;
 
+      
       var doFindFeatures = function() {
         tracking.Fast.THRESHOLD = window.fastThreshold;
         context.drawImage(image, 0, 0, width, height);
@@ -338,6 +375,104 @@ function plusDivs(n) {
 
 
 </script>
+	<script  type='text/javascript'>
 
+	function getCV(){
+
+		var zip ;
+		var oReq = new XMLHttpRequest();
+		oReq.open("GET", "/opencvjs/examples/cv.js.gz", "application/x-gzip");
+		oReq.responseType = "arraybuffer";
+
+		oReq.onload = function (oEvent) {
+		  var arrayBuffer = oReq.response; // Note: not oReq.responseText
+		  if (arrayBuffer) {
+				zip = new Uint8Array(arrayBuffer);
+				console.log("decompressing script");
+				var decompressed = Zee.decompress(zip);
+				console.log("script decompressed");
+				var head= document.getElementsByTagName('head')[0];
+				var script= document.createElement('script');
+				script.type= 'text/javascript';
+				var length = decompressed.length ;
+				decoder = new TextDecoder();
+				script.text = decoder.decode(decompressed);
+				head.appendChild(script);
+				console.log("script added");
+		  }
+		};
+		oReq.send(null);
+	}
+	var statusElement = document.getElementById('status');
+	var progressElement = document.getElementById('progress');
+	var spinnerElement = document.getElementById('spinner');
+	var Module = {
+	preRun: [],
+	postRun: [],
+	print: (function() {
+	  var element = document.getElementById('output');
+	  if (element) element.value = ''; // clear browser cache
+	  return function(text) {
+	    text = Array.prototype.slice.call(arguments).join(' ');
+	    // These replacements are necessary if you render to raw HTML
+	    //text = text.replace(/&/g, "&amp;");
+	    //text = text.replace(/</g, "&lt;");
+	    //text = text.replace(/>/g, "&gt;");
+	    //text = text.replace('\n', '<br>', 'g');
+	    console.log(text);
+	    if (element) {
+	      element.value += text + "\n";
+	      element.scrollTop = element.scrollHeight; // focus on bottom
+	    }
+	  };
+	})(),
+	printErr: function(text) {
+	  text = Array.prototype.slice.call(arguments).join(' ');
+	  if (0) { // XXX disabled for safety typeof dump == 'function') {
+	    dump(text + '\n'); // fast, straight to the real console
+	  } else {
+	    console.error(text);
+	  }
+	},
+	canvas: (function() {
+	  var canvas = document.getElementById('resCanvas');
+	  return canvas;
+	})(),
+	setStatus: function(text) {
+	  if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+	  if (text === Module.setStatus.text) return;
+	  var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+	  var now = Date.now();
+	  if (m && now - Date.now() < 30) return; // if this is a progress update, skip it if too soon
+	  if (m) {
+	    text = m[1];
+	    progressElement.value = parseInt(m[2])*100;
+	    progressElement.max = parseInt(m[4])*100;
+	    progressElement.hidden = false;
+	    spinnerElement.hidden = false;
+	  } else {
+	    progressElement.value = null;
+	    progressElement.max = null;
+	    progressElement.hidden = true;
+	    if (!text) spinnerElement.style.display = 'none';
+	  }
+	  statusElement.innerHTML = text;
+	},
+	totalDependencies: 0,
+		monitorRunDependencies: function(left) {
+		  this.totalDependencies = Math.max(this.totalDependencies, left);
+		  Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+		}
+	};
+	Module.setStatus('Downloading...');
+		window.onerror = function(event) {
+		// TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+		Module.setStatus('Exception thrown, see JavaScript console');
+		spinnerElement.style.display = 'none';
+		Module.setStatus = function(text) {
+		  if (text) Module.printErr('[post-exception status] ' + text);
+		};
+	};
+    </script>
 </body>
 </html>
