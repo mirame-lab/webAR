@@ -128,11 +128,7 @@
 </div>
 <hr>
 
-	<div class="spinner" id='spinner'></div>
-    <div class="emscripten" id="status">Downloading...</div>
-    <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>
-    </div>
+
 
 
 
@@ -147,8 +143,7 @@
   </div>
   <p>Remember to check out our  <a href="w3css_references.asp" class="w3-btn w3-theme-light" target="_blank">W3.CSS Reference</a></p>
 </footer>
-<script src='dat.gui.js'></script>
-<script async src="cv.js"></script>
+
 <!-- Script for Sidebar, Tabs, Accordions, Progress bars and slideshows -->
 <script>
     var fullMarkerURL = null;
@@ -173,7 +168,7 @@ var loadFile = function(event) {
     document.getElementById("gen").disabled = false;
 };
 
-//////////////////////////////////to be replaced with OpenCV//////////////////////////////////////////
+
 
 function grayscale(image){
   
@@ -228,12 +223,9 @@ function generate_feature(){
 
       marker.style.display = "block";
 
-      //not working
-      // var gui = new dat.GUI();
-      // gui.add(window, 'fastThreshold', 0, 100).onChange(doFindFeatures);
 }
 
-//////////////////////////////////to be replaced with OpenCV//////////////////////////////////////////
+
 
 
 //generate and download pattern
@@ -318,37 +310,7 @@ function updateFullMarkerImage(){
 	}
 
 
-// Side navigation
-function w3_open() {
-  var x = document.getElementById("mySidebar");
-  x.style.width = "100%";
-  x.style.fontSize = "40px";
-  x.style.paddingTop = "10%";
-  x.style.display = "block";
-}
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-}
 
-
-
-// Accordions
-function myAccFunc(id) {
-  var x = document.getElementById(id);
-  if (x.className.indexOf("w3-show") == -1) {
-    x.className += " w3-show";
-  } else { 
-    x.className = x.className.replace(" w3-show", "");
-  }
-}
-
-// Slideshows
-var slideIndex = 1;
-
-function plusDivs(n) {
-  slideIndex = slideIndex + n;
-  showDivs(slideIndex);
-}
 
 
 </script>
